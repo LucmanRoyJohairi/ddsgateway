@@ -2,6 +2,11 @@
 
 namespace App\Exceptions;
 
+
+use App\Traits\ApiResponse;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response; 
+
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Validation\ValidationException;
@@ -11,6 +16,7 @@ use Throwable;
 
 class Handler extends ExceptionHandler
 {
+    use ApiResponse;
     /**
      * A list of the exception types that should not be reported.
      *
@@ -49,6 +55,13 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $exception)
     {
+        if ($exception instanceof ClientException) {
+            $message = $exception->getResponse()->getBody();
+            $code = $exception->getCode();
+
+            return $this->errorMessage($message,200);
+        }
         return parent::render($request, $exception);
+        
     }
 }
